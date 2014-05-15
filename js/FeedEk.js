@@ -14,18 +14,29 @@
             CharacterLimit: 0,
             TitleLinkTarget: "_blank",
             DateFormat: "",
-            DateFormatLang:"en"
+            DateFormatLang:"en",
+			SortOrder: ""
         }, opt);
 
         var id = $(this).attr("id"), i, s = "",dt;
-        $("#" + id).empty().append('<img src="loader.gif" />');
+        $("#" + id).empty().append('<img src="/images/FeedEK/loader.gif" />');
 
         $.ajax({
             url: "http://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=" + def.MaxCount + "&output=json&q=" + encodeURIComponent(def.FeedUrl) + "&hl=en&callback=?",
             dataType: "json",
             success: function (data) {
                 $("#" + id).empty();
-                $.each(data.responseData.feed.entries, function (e, item) {
+				var entries = data.responseData.feed.entries;
+				entries.sort(
+					function(entry1, entry2){
+						if(def.SortOrder == 'Asc') {
+							return new Date(entry1.publishedDate) - new Date(entry2.publishedDate);
+						} else if(def.SortOrder == 'Desc') {
+							return new Date(entry2.publishedDate) - new Date(entry1.publishedDate);
+						}
+						return 0;
+					});
+                $.each(entries, function (e, item) {
                     s += '<li><div class="itemTitle"><a href="' + item.link + '" target="' + def.TitleLinkTarget + '" >' + item.title + "</a></div>";
                     
                     if (def.ShowPubDate){
